@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>巧克力艺术展 · Chocolate Art Exhibition</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%231A0F08'/%3E%3Ccircle cx='50' cy='50' r='35' fill='%230A3CDB'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Noto+Serif+SC:wght@400;700;900&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --cream: #F6F0E5;
+      --espresso: #1A0F08;
+      --milk: #A67C52;
+      --gold: #C89F5E;
+      --accent: #0A3CDB;
+      --text: #1A0F08;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; overflow-x: hidden; }
+    body {
+      margin: 0;
+      background: var(--cream);
+      color: var(--text);
+      font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      font-weight: 300;
+      line-height: 1.65;
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3, h4 {
+      margin: 0;
+      font-family: 'Noto Serif SC', 'Songti SC', 'STSong', serif;
+    }
+
+    .en {
+      font-family: 'Playfair Display', 'Times New Roman', serif;
+      font-style: italic;
+      letter-spacing: 0.02em;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    /* Progress & Nav */
+    #progress {
+      position: fixed;
+      top: 0; left: 0;
+      height: 2px;
+      width: 0%;
+      background: var(--accent);
+      z-index: 300;
+      transition: width .05s linear;
+    }
+
+    #nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 200;
+      padding: 22px 5vw;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #fff;
+      mix-blend-mode: difference;
+      pointer-events: none;
+    }
+    #nav .brand {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .18em;
+      pointer-events: auto;
+    }
+    #nav .menu {
+      font-size: 11px;
+      letter-spacing: .14em;
+      opacity: .85;
+      pointer-events: auto;
+    }
+
+    #dots {
+      position: fixed;
+      right: 24px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 150;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    #dots a {
+      display: block;
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,.35);
+      background: transparent;
+      transition: all .25s;
+    }
+    #dots a.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      transform: scale(1.35);
+    }
+    #dots.light a { border-color: rgba(26,15,8,.25); }
+    #dots.light a.active { background: var(--accent); border-color: var(--accent); }
+
+    /* Reveal */
+    .reveal {
+      opacity: 0;
+      transform: translateY(48px);
+      transition: opacity .9s cubic-bezier(.2,.6,.2,1), transform .9s cubic-bezier(.2,.6,.2,1);
+      will-change: transform, opacity;
+    }
+    .reveal.in { opacity: 1; transform: none; }
+
+    /* Hero */
+    .hero {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      align-items: flex-end;
+      color: #fff;
+    }
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 115%;
+      object-fit: cover;
+      transform: translateY(-5%);
+      will-change: transform;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(26,15,8,.93) 0%, rgba(26,15,8,.55) 30%, rgba(26,15,8,.18) 60%, rgba(26,15,8,.45) 100%);
+      z-index: 1;
+    }
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      padding: 10vh 7vw 14vh;
+    }
+    .hero-kicker {
+      font-size: 11px;
+      letter-spacing: .35em;
+      text-transform: uppercase;
+      opacity: .8;
+      margin-bottom: 1.4em;
+    }
+    .hero h1 {
+      font-size: clamp(52px, 12vw, 180px);
+      font-weight: 900;
+      line-height: 1.0;
+      letter-spacing: -.02em;
+    }
+    .hero .en-sub {
+      font-size: clamp(22px, 3.2vw, 52px);
+      opacity: .9;
+      margin: .5em 0 1.2em;
+    }
+    .hero-tagline {
+      max-width: 520px;
+      font-size: clamp(14px, 1.2vw, 20px);
+      line-height: 1.85;
+      opacity: .78;
+    }
+    .scroll-indicator {
+      position: absolute;
+      bottom: 34px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 3;
+      color: #fff;
+      font-size: 10px;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      opacity: .65;
+      animation: bob 2.2s ease-in-out infinite;
+    }
+    @keyframes bob {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(9px); }
+    }
+
+    /* Statement */
+    .statement {
+      position: relative;
+      width: 100vw;
+      min-height: 100vh;
+      overflow: hidden;
+      display: flex;
+      align-items: flex-end;
+      color: #fff;
+    }
+    .statement-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 115%;
+      object-fit: cover;
+      object-position: 50% 40%;
+      transform: translateY(-5%);
+      will-change: transform;
+    }
+    .statement::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(100deg, rgba(26,15,8,.82) 0%, rgba(26,15,8,.35) 55%, rgba(26,15,8,.15) 100%);
+      z-index: 1;
+    }
+    .statement-content {
+      position: relative;
+      z-index: 2;
+      padding: 14vh 10vw 16vh;
+      max-width: 42em;
+    }
+    .statement-content h2 {
+      font-size: clamp(42px, 7vw, 110px);
+      font-weight: 900;
+      line-height: 1.05;
+      margin-bottom: .25em;
+    }
+    .statement-content .en {
+      font-size: clamp(22px, 3vw, 48px);
+      opacity: .8;
+      margin-bottom: 1em;
+    }
+    .statement-content p {
+      font-size: clamp(15px, 1.2vw, 20px);
+      line-height: 1.85;
+      opacity: .75;
+      max-width: 460px;
+    }
+
+    /* Chapter interludes */
+    .chapter {
+      position: relative;
+      width: 100vw;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 14vh 7vw;
+      overflow: hidden;
+      color: var(--cream);
+    }
+    .chapter-cobalt { background: var(--accent); }
+    .chapter-espresso { background: var(--espresso); }
+    .chapter-number {
+      position: absolute;
+      top: 7vh;
+      right: 4vw;
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: clamp(140px, 24vw, 360px);
+      line-height: .78;
+      opacity: .11;
+      pointer-events: none;
+    }
+    .chapter-label {
+      font-size: 11px;
+      letter-spacing: .35em;
+      text-transform: uppercase;
+      opacity: .7;
+      margin-bottom: 1.6em;
+    }
+    .chapter-title {
+      font-size: clamp(44px, 8.5vw, 140px);
+      font-weight: 900;
+      line-height: 1.03;
+      margin-bottom: .18em;
+    }
+    .chapter-en {
+      font-size: clamp(22px, 3vw, 48px);
+      opacity: .75;
+      margin-bottom: 1em;
+    }
+    .chapter-desc {
+      max-width: 540px;
+      font-size: clamp(14px, 1.15vw, 20px);
+      line-height: 1.85;
+      opacity: .82;
+    }
+
+    /* Full-bleed plates */
+    .plate {
+      position: relative;
+      width: 100vw;
+      min-height: 88vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: var(--cream);
+    }
+    .plate-media {
+      position: relative;
+      width: 94vw;
+      aspect-ratio: 16 / 9;
+      overflow: hidden;
+    }
+    .plate-media.full {
+      width: 100vw;
+      height: 100vh;
+    }
+    .plate-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scale(1.06);
+      transition: transform 1.3s cubic-bezier(.2,.6,.2,1);
+      will-change: transform;
+    }
+    .plate.in .plate-media img { transform: scale(1); }
+    .plate-caption {
+      position: absolute;
+      z-index: 2;
+      bottom: 10vh;
+      left: 7vw;
+      max-width: 45vw;
+      color: #fff;
+      text-shadow: 0 2px 18px rgba(0,0,0,.55);
+    }
+    .plate-media.full + .plate-caption,
+    .plate.full .plate-caption { bottom: 8vh; }
+    .plate-caption.right { left: auto; right: 7vw; text-align: right; }
+    .plate-caption .plate-no {
+      font-family: 'Playfair Display', serif;
+      font-size: 13px;
+      letter-spacing: .15em;
+      opacity: .8;
+      margin-bottom: .5em;
+    }
+    .plate-caption h3 {
+      font-size: clamp(26px, 3.5vw, 64px);
+      line-height: 1.08;
+      margin-bottom: .2em;
+    }
+    .plate-caption .en {
+      font-size: clamp(15px, 1.6vw, 28px);
+      opacity: .85;
+    }
+    .plate-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(26,15,8,.7) 0%, rgba(26,15,8,.12) 50%, rgba(26,15,8,.05) 100%);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* Split editorial */
+    .split {
+      position: relative;
+      width: 100vw;
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: var(--cream);
+    }
+    .split.reverse { direction: rtl; }
+    .split.reverse > * { direction: ltr; }
+    .split-media {
+      position: relative;
+      min-height: 100%;
+      overflow: hidden;
+      background: var(--cream);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .split-media img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+    .split-text {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 8vw;
+    }
+    .split-text .number {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: clamp(80px, 14vw, 180px);
+      line-height: .82;
+      color: var(--accent);
+      opacity: .18;
+      margin-bottom: .12em;
+    }
+    .split-text h3 {
+      font-size: clamp(30px, 4vw, 68px);
+      font-weight: 900;
+      line-height: 1.05;
+      margin-bottom: .25em;
+    }
+    .split-text .en {
+      font-size: clamp(18px, 1.8vw, 30px);
+      color: var(--milk);
+      margin-bottom: 1.2em;
+    }
+    .split-text p {
+      font-size: clamp(14px, 1.1vw, 19px);
+      line-height: 1.85;
+      opacity: .8;
+      max-width: 32em;
+    }
+
+    /* Stack (boards) */
+    .stack {
+      position: relative;
+      width: 100vw;
+    }
+    .stack img {
+      width: 100vw;
+      height: auto;
+      display: block;
+      margin: 0;
+    }
+
+    /* Full-bleed moment */
+    .moment {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      align-items: flex-end;
+      color: #fff;
+    }
+    .moment-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 115%;
+      object-fit: cover;
+      transform: translateY(-5%);
+      will-change: transform;
+    }
+    .moment::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(26,15,8,.88) 0%, rgba(26,15,8,.3) 50%, rgba(26,15,8,.18) 100%);
+      z-index: 1;
+    }
+    .moment-content {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      padding: 10vh 7vw 12vh;
+    }
+    .moment-content h3 {
+      font-size: clamp(36px, 6.5vw, 100px);
+      font-weight: 900;
+      line-height: 1.03;
+      margin-bottom: .2em;
+    }
+    .moment-content .en {
+      font-size: clamp(20px, 2.8vw, 44px);
+      opacity: .85;
+    }
+    .moment-content p {
+      max-width: 520px;
+      font-size: clamp(14px, 1.15vw, 19px);
+      line-height: 1.8;
+      opacity: .78;
+      margin-top: 1.2em;
+    }
+    .moment-content.right { align-items: flex-end; text-align: right; }
+    .moment-content.right p { margin-left: auto; }
+
+    /* Elements / closing */
+    .elements {
+      position: relative;
+      width: 100vw;
+      min-height: 100vh;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--cream);
+    }
+    .elements img {
+      width: 94vw;
+      height: auto;
+      max-height: 88vh;
+      object-fit: contain;
+    }
+    .elements-caption {
+      position: absolute;
+      bottom: 8vh;
+      left: 7vw;
+      color: var(--text);
+    }
+    .elements-caption h3 {
+      font-size: clamp(36px, 6vw, 96px);
+      font-weight: 900;
+    }
+    .elements-caption .en {
+      font-size: clamp(18px, 2.4vw, 36px);
+      color: var(--accent);
+    }
+
+    .closing {
+      position: relative;
+      width: 100vw;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--cream);
+      overflow: hidden;
+    }
+    .closing-media {
+      position: relative;
+      width: 94vw;
+      height: 88vh;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+    }
+    .closing-media img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+    .closing-media::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(60deg, rgba(26,15,8,.88) 0%, rgba(26,15,8,.35) 45%, transparent 70%);
+      z-index: 1;
+      pointer-events: none;
+    }
+    .closing-content {
+      position: absolute;
+      bottom: 8vh;
+      left: 7vw;
+      z-index: 2;
+      color: #fff;
+      max-width: 46vw;
+      text-shadow: 0 2px 18px rgba(0,0,0,.55);
+    }
+    .closing-content h2 {
+      font-size: clamp(44px, 8vw, 132px);
+      font-weight: 900;
+      line-height: 1.03;
+      margin-bottom: .15em;
+    }
+    .closing-content .en {
+      font-size: clamp(22px, 3vw, 48px);
+      opacity: .82;
+      margin-bottom: 1em;
+    }
+    .closing-content p {
+      max-width: 520px;
+      font-size: clamp(14px, 1.15vw, 20px);
+      line-height: 1.85;
+      opacity: .78;
+    }
+
+    .accent { color: var(--accent); }
+
+    @media (max-width: 900px) {
+      #nav { padding: 18px 5vw; }
+      #dots { right: 16px; gap: 12px; }
+      .split { grid-template-columns: 1fr; min-height: auto; }
+      .split-media { min-height: 60vh; }
+      .split-text { padding: 10vh 7vw; }
+      .plate-media { width: 100vw; height: 70vh; }
+      .plate-caption { left: 6vw; right: 6vw; max-width: none; bottom: 8vh; }
+      .plate-caption.right { left: 6vw; text-align: left; }
+      .statement-content { max-width: none; padding: 12vh 8vw; }
+      .chapter-number { top: 5vh; }
+    }
+  </style>
+</head>
+<body>
+  <div id="progress"></div>
+  <nav id="nav">
+    <div class="brand">巧克力艺术展</div>
+    <div class="menu">A SWEETER WORLD</div>
+  </nav>
+
+  <aside id="dots">
+    <a href="#top" data-target="top" class="active"></a>
+    <a href="#motto" data-target="motto"></a>
+    <a href="#act1" data-target="act1"></a>
+    <a href="#act2" data-target="act2"></a>
+    <a href="#act3" data-target="act3"></a>
+    <a href="#act4" data-target="act4"></a>
+    <a href="#study" data-target="study"></a>
+    <a href="#elements" data-target="elements"></a>
+    <a href="#end" data-target="end"></a>
+  </aside>
+
+  <!-- Hero -->
+  <section class="hero" id="top">
+    <img class="hero-bg" src="assets/hero-entrance.jpg" alt="巧克力艺术展入口">
+    <div class="hero-content">
+      <div class="hero-kicker reveal">A SWEETER WORLD</div>
+      <h1 class="reveal">巧克力<br>艺术展</h1>
+      <div class="en en-sub reveal">Chocolate Art Exhibition</div>
+      <p class="hero-tagline reveal">从一颗可可豆出发，进入巧克力构筑的奇幻世界。入口、走廊、工坊、交互区，每一步都是一场关于甜蜜的艺术探险。</p>
+    </div>
+    <div class="scroll-indicator">Scroll</div>
+  </section>
+
+  <!-- Motto / Signature Blue -->
+  <section class="statement" id="motto">
+    <img class="statement-bg" src="assets/moment-blue.jpg" alt="Chocolate Art World">
+    <div class="statement-content">
+      <h2 class="reveal">ART MAKES<br>LIFE SWEETER</h2>
+      <div class="en reveal">Chocolate Art World</div>
+      <p class="reveal">这里不是传统的展览，而是一次沉浸式的巧克力美学体验。可可、糖果、融化的巧克力河流，共同编织出一个更甜蜜的世界。</p>
+    </div>
+  </section>
+
+  <!-- Act 1 -->
+  <section class="chapter chapter-cobalt" id="act1">
+    <div class="chapter-number">01</div>
+    <div class="chapter-label reveal">Act One</div>
+    <h2 class="chapter-title reveal">可可豆起源</h2>
+    <div class="chapter-en reveal">Origin of the Cacao Bean</div>
+    <p class="chapter-desc reveal">一切从这里开始。在可可豆的故乡，孩子们亲手触摸、闻香、观察一颗豆子的旅程，让遥远的雨林故事变得可感可知。</p>
+  </section>
+
+  <section class="plate" id="p03">
+    <div class="plate-media"><div class="plate-overlay"></div><img src="pages/p03.png" alt="巧克力博物馆入口区域"></div>
+    <div class="plate-caption reveal">
+      <div class="plate-no">01 · 入口区域</div>
+      <h3>巧克力博物馆入口区域</h3>
+      <div class="en">Entrance Area</div>
+    </div>
+  </section>
+
+  <section class="split" id="p04">
+    <div class="split-media"><img src="pages/p04.png" alt="巧克力博物馆入口"></div>
+    <div class="split-text">
+      <div class="number reveal">01</div>
+      <h3 class="reveal">巧克力博物馆入口</h3>
+      <div class="en reveal">Museum Entrance</div>
+      <p class="reveal">从可可熊的欢迎开始，墙面流淌着融化的巧克力，地面延展成可可河流，让每一位访客在进入的瞬间便置身于一场甜蜜仪式。</p>
+    </div>
+  </section>
+
+  <section class="stack" id="corridor1">
+    <img src="pages/p05.png" alt="第一走廊">
+    <img src="pages/p06.png" alt="第一走廊转角">
+  </section>
+
+  <!-- Act 2 -->
+  <section class="chapter chapter-espresso" id="act2">
+    <div class="chapter-number">02</div>
+    <div class="chapter-label reveal">Act Two</div>
+    <h2 class="chapter-title reveal">从豆到巧克力</h2>
+    <div class="chapter-en reveal">From Bean to Chocolate</div>
+    <p class="chapter-desc reveal">一颗可可豆如何蜕变为一块巧克力？发酵、晾晒、研磨、调温，走廊将这道古老工序变成一段可游可学的叙事。</p>
+  </section>
+
+  <section class="stack" id="corridor2">
+    <img src="pages/p08.png" alt="第二走廊">
+    <img src="pages/p09.png" alt="第二走廊">
+  </section>
+
+  <!-- Act 3 -->
+  <section class="chapter chapter-cobalt" id="act3">
+    <div class="chapter-number">03</div>
+    <div class="chapter-label reveal">Act Three</div>
+    <h2 class="chapter-title reveal">巧克力制作工坊</h2>
+    <div class="chapter-en reveal">Chocolate Making Workshop</div>
+    <p class="chapter-desc reveal">工坊不只是观看，更是动手。研磨机、冷却机、模具台，每一个装置都邀请人们参与一块巧克力的诞生。</p>
+  </section>
+
+  <section class="stack" id="corridor3">
+    <img src="pages/p11.png" alt="第三走廊">
+    <img src="pages/p12.png" alt="第三走廊">
+    <img src="pages/p13.png" alt="第三走廊">
+  </section>
+
+  <!-- Act 4 -->
+  <section class="chapter chapter-espresso" id="act4">
+    <div class="chapter-number">04</div>
+    <div class="chapter-label reveal">Act Four</div>
+    <h2 class="chapter-title reveal">巧克力艺术交互区</h2>
+    <div class="chapter-en reveal">Chocolate Art Interactive Zone</div>
+    <p class="chapter-desc reveal">当巧克力遇见艺术，味觉、触觉、视觉全部打开。这里是想象力发酵的地方，也是整个展览的高潮。</p>
+  </section>
+
+  <section class="moment" id="factory">
+    <img class="moment-bg" src="assets/moment-factory.jpg" alt="巧克力工厂">
+    <div class="moment-content">
+      <h3 class="reveal">巧克力工厂</h3>
+      <div class="en reveal">Choco Factory</div>
+      <p class="reveal">巨大的巧克力冷却机、管道、齿轮与流淌的巧克力浆，把工业美学搬进博物馆，让孩子们相信童话里真的有一座糖果工厂。</p>
+    </div>
+  </section>
+
+  <section class="stack" id="interactive">
+    <img src="pages/p15.png" alt="巧克力艺术交互区">
+    <img src="pages/p16.png" alt="巧克力艺术交互区">
+    <img src="pages/p17.png" alt="巧克力艺术交互区">
+    <img src="pages/p18.png" alt="巧克力艺术交互区">
+    <img src="pages/p19.png" alt="巧克力艺术交互区">
+    <img src="pages/p20.png" alt="巧克力艺术交互区">
+  </section>
+
+  <!-- Study / Stage / Retail -->
+  <section class="chapter chapter-cobalt" id="study">
+    <div class="chapter-number">05</div>
+    <div class="chapter-label reveal">Act Five</div>
+    <h2 class="chapter-title reveal">研学 · 舞台 · 周边</h2>
+    <div class="chapter-en reveal">Study · Stage · Retail</div>
+    <p class="chapter-desc reveal">展览之外，体验继续。研学课堂让知识化为动手能力，舞台承载表演与发布，文创周边把甜蜜带回家。</p>
+  </section>
+
+  <section class="moment" id="workshop">
+    <img class="moment-bg" src="assets/moment-workshop.jpg" alt="研学巧克力制作区">
+    <div class="moment-content right">
+      <h3 class="reveal">研学巧克力制作区</h3>
+      <div class="en reveal">Chocolate Workshop</div>
+      <p class="reveal">波浪形长桌、可可色调座椅、从天花板滴落的巧克力灯带，围合出一个温柔又充满创造力的手工课堂。</p>
+    </div>
+  </section>
+
+  <section class="stack" id="study-stack">
+    <img src="pages/p22.png" alt="舞台">
+    <img src="pages/p23.png" alt="巧克力艺术交互区">
+    <img src="pages/p24.png" alt="研学巧克力制作区">
+    <img src="pages/p25.png" alt="研学巧克力制作区">
+    <img src="pages/p26.png" alt="研学巧克力文创周边">
+  </section>
+
+  <!-- Elements -->
+  <section class="elements" id="elements">
+    <img src="pages/p28.png" alt="视觉元素">
+    <div class="elements-caption reveal">
+      <h3>元素</h3>
+      <div class="en">Visual Elements</div>
+    </div>
+  </section>
+
+  <!-- Closing -->
+  <section class="closing" id="end">
+    <div class="closing-media">
+      <img src="pages/p29.png" alt="总平面图">
+    </div>
+    <div class="closing-content">
+      <h2 class="reveal">总平面图</h2>
+      <div class="en reveal">Master Plan</div>
+      <p class="reveal">从入口到尾声，四个幕章、三条走廊、研学舞台与周边区串联成一个完整的巧克力旅程。这是一座可以走进的甜蜜之城。</p>
+    </div>
+  </section>
+
+  <script>
+    // Progress bar
+    function updateProgress() {
+      const h = document.documentElement.scrollHeight - window.innerHeight;
+      const p = h > 0 ? (window.scrollY / h) * 100 : 0;
+      document.getElementById('progress').style.width = p + '%';
+    }
+    window.addEventListener('scroll', updateProgress, { passive: true });
+    updateProgress();
+
+    // Reveal on scroll
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('in');
+          revealObserver.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+
+    document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+    // Plate reveal for image scale
+    const plateObserver = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('in');
+          plateObserver.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.2 });
+
+    document.querySelectorAll('.plate').forEach(el => plateObserver.observe(el));
+
+    // Parallax
+    const parallaxImages = document.querySelectorAll('.hero-bg, .statement-bg, .moment-bg');
+    function onScroll() {
+      const y = window.scrollY;
+      parallaxImages.forEach(img => {
+        const rect = img.parentElement.getBoundingClientRect();
+        if (rect.bottom > 0 && rect.top < window.innerHeight) {
+          const speed = 0.06;
+          const offset = (rect.top - window.innerHeight) * speed;
+          img.style.transform = `translateY(${offset}px) scale(1.05)`;
+        }
+      });
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    // Nav dots active state
+    const sections = ['top', 'motto', 'act1', 'act2', 'act3', 'act4', 'study', 'elements', 'end'];
+    const dotMap = {};
+    document.querySelectorAll('#dots a').forEach(a => { dotMap[a.dataset.target] = a; });
+
+    const sectionObserver = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          document.querySelectorAll('#dots a').forEach(a => a.classList.remove('active'));
+          const dot = dotMap[e.target.id];
+          if (dot) dot.classList.add('active');
+        }
+      });
+    }, { threshold: 0.4 });
+
+    sections.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) sectionObserver.observe(el);
+    });
+
+    // Dot light/dark based on section background
+    const darkSections = ['top', 'motto', 'act1', 'act3', 'factory', 'study', 'workshop', 'end'];
+    const darkObserver = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          const isLight = ['act2', 'elements'].includes(e.target.id);
+          document.getElementById('dots').classList.toggle('light', isLight);
+        }
+      });
+    }, { threshold: 0.3 });
+    sections.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) darkObserver.observe(el);
+    });
+  </script>
+</body>
+</html>
